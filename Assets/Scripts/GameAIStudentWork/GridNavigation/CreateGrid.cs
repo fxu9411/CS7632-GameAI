@@ -6,11 +6,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameAICourse {
-
+namespace GameAICourse
+{
     public class CreateGrid
     {
-
         // Please change this string to your name
         public const string StudentAuthorName = "Weixuan Xu";
 
@@ -51,15 +50,17 @@ namespace GameAICourse {
         // This method should return true if the point p is on one of the edges of the cell.
         // This is more efficient than PointInsidePolygon() for an equivalent dimension poly
         // Preconditions: minCellBounds <= maxCellBounds, per dimension
-        static bool IsPointInsideAxisAlignedBoundingBox(Vector2Int minCellBounds, Vector2Int maxCellBounds, Vector2Int p)
+        static bool IsPointInsideAxisAlignedBoundingBox(Vector2Int minCellBounds, Vector2Int maxCellBounds,
+            Vector2Int p)
         {
-            //TODO IMPLEMENT
+            if (p.x > maxCellBounds.x || p.x < minCellBounds.x || p.y > maxCellBounds.y || p.y < minCellBounds.y)
+            {
+                return false;
+            }
 
             // placeholder logic to be replaced by the student
             return true;
         }
-
-
 
 
         // IsRangeOverlapping(): Determines if the range (inclusive) from min1 to max1 overlaps the range (inclusive) from min2 to max2.
@@ -75,17 +76,14 @@ namespace GameAICourse {
         // IsAxisAlignedBouningBoxOverlapping(): Determines if the AABBs defined by min1,max1 and min2,max2 overlap or touch
         // Returns true if overlap, false otherwise.
         // Preconditions: min1 <= max1, per dimension. min2 <= max2 per dimension
-        static bool IsAxisAlignedBoundingBoxOverlapping(Vector2Int min1, Vector2Int max1, Vector2Int min2, Vector2Int max2)
+        static bool IsAxisAlignedBoundingBoxOverlapping(Vector2Int min1, Vector2Int max1, Vector2Int min2,
+            Vector2Int max2)
         {
-
             // TODO IMPLEMENT
             // HINT: Call IsRangeOverlapping()
 
             return true;
         }
-
-
-
 
 
         // IsTraversable(): returns true if the grid is traversable from grid[x,y] in the direction dir, false otherwise.
@@ -96,7 +94,6 @@ namespace GameAICourse {
         // Note: public methods are autograded
         public static bool IsTraversable(bool[,] grid, int x, int y, TraverseDirection dir)
         {
-
             // TODO IMPLEMENT
 
             //placeholder logic to be replaced by the student
@@ -116,7 +113,7 @@ namespace GameAICourse {
         public static void Create(Vector2 canvasOrigin, float canvasWidth, float canvasHeight, float cellWidth,
             List<Polygon> obstacles,
             out bool[,] grid
-            )
+        )
         {
             // ignoring the obstacles for this limited demo; 
             // Marks cells of the grid untraversable if geometry intersects interior!
@@ -127,10 +124,6 @@ namespace GameAICourse {
 
             grid = new bool[1, 1];
             grid[0, 0] = true;
-
-
         }
-
     }
-
 }
