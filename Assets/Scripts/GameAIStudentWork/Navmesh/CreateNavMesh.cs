@@ -14,7 +14,7 @@ namespace GameAICourse
     public class CreateNavMesh
     {
 
-        public static string StudentAuthorName = "George P. Burdell ← Not your name, change it!";
+        public static string StudentAuthorName = "Weixuan Xu";
 
 
 
