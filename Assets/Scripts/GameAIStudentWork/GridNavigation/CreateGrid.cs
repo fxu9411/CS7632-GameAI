@@ -12,7 +12,7 @@ namespace GameAICourse {
     {
 
         // Please change this string to your name
-        public const string StudentAuthorName = "George P. Burdell ← Not your name, change it!";
+        public const string StudentAuthorName = "Weixuan Xu";
 
 
         // Helper method provided to help you implement this file. Leave as is.
