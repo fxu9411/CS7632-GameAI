@@ -2,6 +2,7 @@
 // Remove the line above if you are subitting to GradeScope for a grade. But leave it if you only want to check
 // that your code compiles and the autograder can access your public methods.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -129,8 +130,58 @@ namespace GameAICourse
 
             // also ignoring the world boundary defined by canvasOrigin and canvasWidth and canvasHeight
 
+            Debug.Log(canvasOrigin);
 
-            grid = new bool[Mathf.FloorToInt(canvasWidth / cellWidth), Mathf.FloorToInt(canvasHeight / cellWidth)];
+            int rows = Mathf.FloorToInt(canvasWidth / cellWidth);
+            int cols = Mathf.FloorToInt(canvasHeight / cellWidth);
+            Vector2Int canvasOriginConverted = Convert(canvasOrigin);
+            Vector2Int cellGridScale = new Vector2Int(Convert(cellWidth), Convert(cellWidth));
+
+            Debug.Log(canvasOriginConverted);
+            Debug.Log(cellGridScale);
+            foreach (Polygon p in obstacles)
+            {
+                foreach (Vector2Int v in p.getIntegerPoints())
+                {
+                    Debug.Log(v);
+                }
+            }
+
+            grid = new bool[rows, cols];
+
+            for (int row = 0; row < rows; row++)
+            {
+                for (int col = 0; col < cols; col++)
+                {
+                    grid[row, col] = true;
+                }
+            }
+
+            for (int row = 0; row < rows; row++)
+            {
+                for (int col = 0; col < cols; col++)
+                {
+                    Vector2Int lowerLeft = cellGridScale * new Vector2Int(row, col) + canvasOriginConverted;
+                    Vector2Int upperLeft = cellGridScale * new Vector2Int(row + 1, col) + canvasOriginConverted;
+                    Vector2Int lowerRight = cellGridScale * new Vector2Int(row, col + 1) + canvasOriginConverted;
+                    Vector2Int upperRight = cellGridScale * new Vector2Int(row + 1, col + 1) + canvasOriginConverted;
+
+                    Vector2Int[] cellGrid = { upperRight, lowerRight, lowerLeft, upperLeft };
+                    
+                    foreach (Polygon obstacle in obstacles)
+                    {
+                        Vector2Int[] polygon = obstacle.getIntegerPoints(); // +- 600, += 600
+
+                        foreach (Vector2Int point in polygon)
+                        {
+                            if (IsPointInsidePolygon(cellGrid, point))
+                            {
+                                grid[row, col] = false;
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
