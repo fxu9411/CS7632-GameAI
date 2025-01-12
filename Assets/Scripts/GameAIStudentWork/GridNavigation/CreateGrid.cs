@@ -69,8 +69,12 @@ namespace GameAICourse
         // Preconditions: min1 <= max1 AND min2 <= max2
         static bool IsRangeOverlapping(int min1, int max1, int min2, int max2)
         {
-            // TODO IMPLEMENT
-            return true;
+            if (min1 <= max2 && min2 <= max1)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         // IsAxisAlignedBouningBoxOverlapping(): Determines if the AABBs defined by min1,max1 and min2,max2 overlap or touch
@@ -79,10 +83,14 @@ namespace GameAICourse
         static bool IsAxisAlignedBoundingBoxOverlapping(Vector2Int min1, Vector2Int max1, Vector2Int min2,
             Vector2Int max2)
         {
-            // TODO IMPLEMENT
             // HINT: Call IsRangeOverlapping()
+            if (IsRangeOverlapping(min1.x, max1.x, min2.x, max2.x) &&
+                IsRangeOverlapping(min1.y, max1.y, min2.y, max2.y))
+            {
+                return true;
+            }
 
-            return true;
+            return false;
         }
 
 
@@ -122,8 +130,7 @@ namespace GameAICourse
             // also ignoring the world boundary defined by canvasOrigin and canvasWidth and canvasHeight
 
 
-            grid = new bool[1, 1];
-            grid[0, 0] = true;
+            grid = new bool[Mathf.FloorToInt(canvasWidth / cellWidth), Mathf.FloorToInt(canvasHeight / cellWidth)];
         }
     }
 }
