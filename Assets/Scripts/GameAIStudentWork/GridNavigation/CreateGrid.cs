@@ -54,13 +54,7 @@ namespace GameAICourse
         static bool IsPointInsideAxisAlignedBoundingBox(Vector2Int minCellBounds, Vector2Int maxCellBounds,
             Vector2Int p)
         {
-            if (p.x > maxCellBounds.x || p.x < minCellBounds.x || p.y > maxCellBounds.y || p.y < minCellBounds.y)
-            {
-                return false;
-            }
-
-            // placeholder logic to be replaced by the student
-            return true;
+            return p.x >= minCellBounds.x && p.x <= maxCellBounds.x && p.y >= minCellBounds.y && p.y <= maxCellBounds.y;
         }
 
 
@@ -70,12 +64,7 @@ namespace GameAICourse
         // Preconditions: min1 <= max1 AND min2 <= max2
         static bool IsRangeOverlapping(int min1, int max1, int min2, int max2)
         {
-            if (min1 <= max2 && min2 <= max1)
-            {
-                return true;
-            }
-
-            return false;
+            return min1 <= max2 && min2 <= max1;
         }
 
         // IsAxisAlignedBouningBoxOverlapping(): Determines if the AABBs defined by min1,max1 and min2,max2 overlap or touch
@@ -85,13 +74,8 @@ namespace GameAICourse
             Vector2Int max2)
         {
             // HINT: Call IsRangeOverlapping()
-            if (IsRangeOverlapping(min1.x, max1.x, min2.x, max2.x) &&
-                IsRangeOverlapping(min1.y, max1.y, min2.y, max2.y))
-            {
-                return true;
-            }
-
-            return false;
+            return IsRangeOverlapping(min1.x, max1.x, min2.x, max2.x) &&
+                   IsRangeOverlapping(min1.y, max1.y, min2.y, max2.y);
         }
 
 
@@ -103,10 +87,48 @@ namespace GameAICourse
         // Note: public methods are autograded
         public static bool IsTraversable(bool[,] grid, int x, int y, TraverseDirection dir)
         {
-            // TODO IMPLEMENT
+            if (grid == null || grid.Rank != 2 || grid.GetLength(0) == 0 || grid.GetLength(1) == 0)
+                return false;
 
-            //placeholder logic to be replaced by the student
-            return true;
+            int rows = grid.GetLength(0);
+            int cols = grid.GetLength(1);
+
+            if (x < 0 || x >= rows || y < 0 || y >= cols)
+                return false;
+
+            Vector2Int direction = GetDirectionVector(dir);
+            int newX = x + direction.x;
+            int newY = y + direction.y;
+
+            if (newX < 0 || newX >= rows || newY < 0 || newY >= cols)
+                return false;
+
+            return grid[x, y] && grid[newX, newY];
+        }
+
+        private static Vector2Int GetDirectionVector(TraverseDirection dir)
+        {
+            switch (dir)
+            {
+                case TraverseDirection.Up:
+                    return new Vector2Int(0, 1);
+                case TraverseDirection.Down:
+                    return new Vector2Int(0, -1);
+                case TraverseDirection.Left:
+                    return new Vector2Int(-1, 0);
+                case TraverseDirection.Right:
+                    return new Vector2Int(1, 0);
+                case TraverseDirection.DownLeft:
+                    return new Vector2Int(-1, -1);
+                case TraverseDirection.DownRight:
+                    return new Vector2Int(1, -1);
+                case TraverseDirection.UpLeft:
+                    return new Vector2Int(-1, 1);
+                case TraverseDirection.UpRight:
+                    return new Vector2Int(1, 1);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
 
@@ -120,35 +142,31 @@ namespace GameAICourse
         //    Example: grid[x_pos, y_pos]
 
         public static void Create(Vector2 canvasOrigin, float canvasWidth, float canvasHeight, float cellWidth,
-            List<Polygon> obstacles,
-            out bool[,] grid
-        )
+            List<Polygon> obstacles, out bool[,] grid)
         {
-            // ignoring the obstacles for this limited demo; 
-            // Marks cells of the grid untraversable if geometry intersects interior!
-            // Carefully consider all possible geometry interactions
-
-            // also ignoring the world boundary defined by canvasOrigin and canvasWidth and canvasHeight
-
-            Debug.Log(canvasOrigin);
-
             int rows = Mathf.FloorToInt(canvasWidth / cellWidth);
             int cols = Mathf.FloorToInt(canvasHeight / cellWidth);
             Vector2Int canvasOriginConverted = Convert(canvasOrigin);
             Vector2Int cellGridScale = new Vector2Int(Convert(cellWidth), Convert(cellWidth));
 
-            Debug.Log(canvasOriginConverted);
-            Debug.Log(cellGridScale);
-            foreach (Polygon p in obstacles)
+            grid = InitializeGrid(rows, cols);
+
+            for (int row = 0; row < rows; row++)
             {
-                foreach (Vector2Int v in p.getIntegerPoints())
+                for (int col = 0; col < cols; col++)
                 {
-                    Debug.Log(v);
+                    Vector2Int[] cellGrid = GetCellGrid(row, col, cellGridScale, canvasOriginConverted);
+                    if (IsCellBlocked(cellGrid, obstacles))
+                    {
+                        grid[row, col] = false;
+                    }
                 }
             }
+        }
 
-            grid = new bool[rows, cols];
-
+        private static bool[,] InitializeGrid(int rows, int cols)
+        {
+            bool[,] grid = new bool[rows, cols];
             for (int row = 0; row < rows; row++)
             {
                 for (int col = 0; col < cols; col++)
@@ -157,31 +175,45 @@ namespace GameAICourse
                 }
             }
 
-            for (int row = 0; row < rows; row++)
+            return grid;
+        }
+
+        private static Vector2Int[] GetCellGrid(int row, int col, Vector2Int cellGridScale,
+            Vector2Int canvasOriginConverted)
+        {
+            Vector2Int lowerLeft = cellGridScale * new Vector2Int(row, col) + canvasOriginConverted;
+            Vector2Int upperLeft = cellGridScale * new Vector2Int(row + 1, col) + canvasOriginConverted;
+            Vector2Int lowerRight = cellGridScale * new Vector2Int(row, col + 1) + canvasOriginConverted;
+            Vector2Int upperRight = cellGridScale * new Vector2Int(row + 1, col + 1) + canvasOriginConverted;
+
+            return new Vector2Int[] { upperRight, lowerRight, lowerLeft, upperLeft };
+        }
+
+        private static bool IsCellBlocked(Vector2Int[] cellGrid, List<Polygon> obstacles)
+        {
+            foreach (Polygon obstacle in obstacles)
             {
-                for (int col = 0; col < cols; col++)
+                Vector2Int[] polygon = obstacle.getIntegerPoints();
+                if (IsAnyPointInsidePolygon(polygon, cellGrid) || IsAnyPointInsidePolygon(cellGrid, polygon))
                 {
-                    Vector2Int lowerLeft = cellGridScale * new Vector2Int(row, col) + canvasOriginConverted;
-                    Vector2Int upperLeft = cellGridScale * new Vector2Int(row + 1, col) + canvasOriginConverted;
-                    Vector2Int lowerRight = cellGridScale * new Vector2Int(row, col + 1) + canvasOriginConverted;
-                    Vector2Int upperRight = cellGridScale * new Vector2Int(row + 1, col + 1) + canvasOriginConverted;
-
-                    Vector2Int[] cellGrid = { upperRight, lowerRight, lowerLeft, upperLeft };
-                    
-                    foreach (Polygon obstacle in obstacles)
-                    {
-                        Vector2Int[] polygon = obstacle.getIntegerPoints(); // +- 600, += 600
-
-                        foreach (Vector2Int point in polygon)
-                        {
-                            if (IsPointInsidePolygon(cellGrid, point))
-                            {
-                                grid[row, col] = false;
-                            }
-                        }
-                    }
+                    return true;
                 }
             }
+
+            return false;
+        }
+
+        private static bool IsAnyPointInsidePolygon(Vector2Int[] polygon, Vector2Int[] points)
+        {
+            foreach (Vector2Int point in points)
+            {
+                if (IsPointInsidePolygon(polygon, point))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
