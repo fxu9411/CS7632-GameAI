@@ -193,10 +193,31 @@ namespace GameAICourse
         {
             foreach (Polygon obstacle in obstacles)
             {
+                if (IsPointInsidePolygon(cellGrid, obstacle.GetIntCentroid()))
+                {
+                    return true;
+                }
+
                 Vector2Int[] polygon = obstacle.getIntegerPoints();
                 if (IsAnyPointInsidePolygon(polygon, cellGrid) || IsAnyPointInsidePolygon(cellGrid, polygon))
                 {
                     return true;
+                }
+
+                // If cellGrid intersects with any edge of the polygon, then the cell is blocked
+                for (int i = 0; i < polygon.Length; i++)
+                {
+                    Vector2Int ptA = polygon[i];
+                    Vector2Int ptB = polygon[(i + 1) % polygon.Length];
+                    for (int j = 0; j < cellGrid.Length; j++)
+                    {
+                        Vector2Int ptC = cellGrid[j];
+                        Vector2Int ptD = cellGrid[(j + 1) % cellGrid.Length];
+                        if (Intersects(ptA, ptB, ptC, ptD))
+                        {
+                            return true;
+                        }
+                    }
                 }
             }
 
