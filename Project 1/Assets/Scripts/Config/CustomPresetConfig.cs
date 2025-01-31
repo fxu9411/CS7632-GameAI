@@ -16,6 +16,7 @@ public class CustomPresetConfig : PresetConfig
         SceneConfigs.Add(SC7());
         SceneConfigs.Add(SC8());
         SceneConfigs.Add(SC9());
+        // SceneConfigs.Add(SC10());
     }
 
     SceneConfig SC0()
@@ -388,9 +389,43 @@ public class CustomPresetConfig : PresetConfig
             pathNodePositions, 10f, 0, 670238407);
     }
 
+    // SceneConfig SC9()
+    // {
+    //     Vector2 origin = new Vector2(10f, 10f);
+    //
+    //     ObstacleConfig[] obstacleConfigs =
+    //     {
+    //     };
+    //
+    //     for (int i = 0; i < obstacleConfigs.Length; ++i)
+    //     {
+    //         obstacleConfigs[i].pos = obstacleConfigs[i].pos + origin;
+    //     }
+    //
+    //     Vector2[] pathNodePositions =
+    //     {
+    //         new Vector2(8f, 0f),
+    //         new Vector2(4.9f, 0f),
+    //         new Vector2(-1.65f, -4f),
+    //         new Vector2(-1.65f, 2.7f),
+    //         new Vector2(3f, -4f),
+    //         new Vector2(3f, 3.2f),
+    //         new Vector2(0f, -2.2f),
+    //         new Vector2(-4f, 0f),
+    //     };
+    //
+    //
+    //     for (int i = 0; i < pathNodePositions.Length; ++i)
+    //         pathNodePositions[i] = pathNodePositions[i] + origin;
+    //
+    //
+    //     return new SceneConfig(new Vector2(30f, 10f), origin, origin + new Vector2(-4f, -4f), 1f, obstacleConfigs,
+    //         pathNodePositions, 10f, 0, 670238407);
+    // }
+    
     SceneConfig SC9()
     {
-        Vector2 origin = new Vector2(10f, 10f);
+        Vector2 origin = new Vector2(-5f, -5f);
 
         ObstacleConfig[] obstacleConfigs =
         {
@@ -403,14 +438,8 @@ public class CustomPresetConfig : PresetConfig
 
         Vector2[] pathNodePositions =
         {
-            new Vector2(8f, 0f),
-            new Vector2(4.9f, 0f),
-            new Vector2(-1.65f, -4f),
-            new Vector2(-1.65f, 2.7f),
-            new Vector2(3f, -4f),
-            new Vector2(3f, 3.2f),
-            new Vector2(0f, -2.2f),
-            new Vector2(-4f, 0f),
+            new Vector2(0f, 0f), //<-- In the middle of the canvas
+            new Vector2(4.5f, 0f) //<-- Close to the middle of the right edge of the canvas boundary
         };
 
 
@@ -418,7 +447,7 @@ public class CustomPresetConfig : PresetConfig
             pathNodePositions[i] = pathNodePositions[i] + origin;
 
 
-        return new SceneConfig(new Vector2(30f, 10f), origin, origin + new Vector2(-4f, -4f), 1f, obstacleConfigs,
-            pathNodePositions, 10f, 0, 670238407);
+        return new SceneConfig(new Vector2(10f, 10f), origin, origin + new Vector2(-4f, -4f), 1f, obstacleConfigs,
+            pathNodePositions, 1f, 0, 670238407);
     }
 }

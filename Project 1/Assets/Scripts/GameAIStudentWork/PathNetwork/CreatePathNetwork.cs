@@ -1,5 +1,4 @@
-﻿// compile_check
-// Remove the line above if you are subitting to GradeScope for a grade. But leave it if you only want to check
+﻿// Remove the line above if you are subitting to GradeScope for a grade. But leave it if you only want to check
 // that your code compiles and the autograder can access your public methods.
 
 using System;
@@ -9,13 +8,9 @@ using UnityEngine;
 
 namespace GameAICourse
 {
-
     public class CreatePathNetwork
     {
-
-        public const string StudentAuthorName = "George P. Burdell ← Not your name, change it!";
-
-
+        public const string StudentAuthorName = "Weixuan Xu";
 
 
         // Helper method provided to help you implement this file. Leave as is.
@@ -97,10 +92,6 @@ namespace GameAICourse
         }
 
 
-
-
-
-
         //Student code to build the path network from the given pathNodes and Obstacles
         //Obstacles - List of obstacles on the plane
         //agentRadius - the radius of the traversing agent
@@ -112,12 +103,45 @@ namespace GameAICourse
         //pathNetworkMode - enum that specifies PathNetwork type (see assignment doc)
 
         public static void Create(Vector2 canvasOrigin, float canvasWidth, float canvasHeight,
-            List<Polygon> obstacles, float agentRadius, float minPoVDist, float maxPoVDist, ref List<Vector2> pathNodes, out List<List<int>> pathEdges,
+            List<Polygon> obstacles, float agentRadius, float minPoVDist, float maxPoVDist, ref List<Vector2> pathNodes,
+            out List<List<int>> pathEdges,
             PathNetworkMode pathNetworkMode)
         {
-
             //STUDENT CODE HERE
 
+            // Initialize the pathEdges list
+            pathEdges = InitializePathEdges(pathNodes);
+
+            // Create the path network based on the pathNetworkMode
+            for (int i = 0; i < pathNodes.Count; ++i)
+            {
+                for (int j = i + 1; j < pathNodes.Count; ++j)
+                {
+                    Vector2 pathNodeA = pathNodes[i];
+                    Vector2 pathNodeB = pathNodes[j];
+
+                    if (CanConnect(pathNodeA, pathNodeB, obstacles, canvasOrigin, canvasWidth, canvasHeight,
+                            agentRadius))
+                    {
+                        pathEdges[i].Add(j);
+                        pathEdges[j].Add(i);
+                    }
+                }
+            }
+            
+            // Deduplicate the pathEdges
+            for (int i = 0; i < pathEdges.Count; ++i)
+            {
+                pathEdges[i] = new List<int>(new HashSet<int>(pathEdges[i]));
+            }
+
+
+            // END STUDENT CODE
+        }
+
+        private static List<List<int>> InitializePathEdges(List<Vector2> pathNodes)
+        {
+            List<List<int>> pathEdges;
             pathEdges = new List<List<int>>(pathNodes.Count);
 
             for (int i = 0; i < pathNodes.Count; ++i)
@@ -125,12 +149,76 @@ namespace GameAICourse
                 pathEdges.Add(new List<int>());
             }
 
-
-            // END STUDENT CODE
-
+            return pathEdges;
         }
 
+        private static bool CanConnect(Vector2 pathNodeA, Vector2 pathNodeB, List<Polygon> obstacles,
+            Vector2 canvasOrigin, float canvasWidth, float canvasHeight, float agentRadius)
+        {
+            // Two nodes can connect if
+            // 1. There's no obstacle or boundary wall between the two path nodes
+            // 2. There is sufficient space on either side of the edge so that an agent can follow the line without colliding with any obstacles or boundary wall
+            // 3. A path node that is inside the boundary but outside any obstacles
+            
+            // If the distance between line segment AB and any obstacle is less than agentRadius, return false
+            foreach (Polygon obstacle in obstacles)
+            {
+                for (int i = 0; i < obstacle.getPoints().Length; ++i)
+                {
+                    Vector2 obstaclePoint = obstacle.getPoints()[i];
+                    if (DistanceToLineSegment(obstaclePoint, pathNodeA, pathNodeB) < agentRadius)
+                    {
+                        return false;
+                    }
+                }
+            }
+            
+            // If line segment AB intersects with any edge of the obstacle, return false
+            for (int i = 0; i < obstacles.Count; ++i)
+            {
+                Polygon obstacle = obstacles[i];
+                for (int j = 0; j < obstacle.getPoints().Length; ++j)
+                {
+                    Vector2 obstaclePointA = obstacle.getPoints()[j];
+                    Vector2 obstaclePointB = obstacle.getPoints()[(j + 1) % obstacle.getPoints().Length];
+                    if (Intersects(ConvertToInt(pathNodeA), ConvertToInt(pathNodeB), ConvertToInt(obstaclePointA),
+                        ConvertToInt(obstaclePointB))
+                    )
+                    {
+                        return false;
+                    }
+                }
+            }
+            
+            // If either pathNodeA or pathNodeB's distance to boundary wall is less than agentRadius, return false
+            float leftBoundary = canvasOrigin.x + agentRadius;
+            float rightBoundary = canvasOrigin.x + canvasWidth - agentRadius;
+            float lowerBoundary = canvasOrigin.y + agentRadius;
+            float upperBoundary = canvasOrigin.y + canvasHeight - agentRadius;
+            if (pathNodeA.x < leftBoundary || pathNodeA.x > rightBoundary ||
+                pathNodeA.y < lowerBoundary || pathNodeA.y > upperBoundary ||
+                pathNodeB.x < leftBoundary || pathNodeB.x > rightBoundary ||
+                pathNodeB.y < lowerBoundary || pathNodeB.y > upperBoundary)
+            {
+                return false;
+            }
+            
+            // If pathNode to any obstacle edges is less than agentRadius, return false
+            foreach (Polygon obstacle in obstacles)
+            {
+                for (int i = 0; i < obstacle.getPoints().Length; ++i)
+                {
+                    Vector2 obstaclePointA = obstacle.getPoints()[i];
+                    Vector2 obstaclePointB = obstacle.getPoints()[(i + 1) % obstacle.getPoints().Length];
+                    if (DistanceToLineSegment(pathNodeA, obstaclePointA, obstaclePointB) < agentRadius || 
+                        DistanceToLineSegment(pathNodeB, obstaclePointA, obstaclePointB) < agentRadius)
+                    {
+                        return false;
+                    }
+                }
+            }
 
+            return true;
+        }
     }
-
 }
