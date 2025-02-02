@@ -9,13 +9,9 @@ using UnityEngine;
 
 namespace GameAICourse
 {
-
-
     public class CreateNavMesh
     {
-
         public static string StudentAuthorName = "Weixuan Xu";
-
 
 
         // Helper method provided to help you implement this file. Leave as is.
@@ -53,9 +49,7 @@ namespace GameAICourse
         // Returns true if point p is inside (but not on edge) the polygon defined by pts (CCW winding). False, otherwise
         public static bool IsPointInsidePolygon(Vector2Int[] pts, Vector2Int p)
         {
-
             return CG.InPoly1(pts, p) == CG.PointPolygonIntersectionType.Inside;
-
         }
 
         // Helper method provided to help you implement this file. Leave as is.
@@ -119,7 +113,6 @@ namespace GameAICourse
         }
 
 
-
         // Create(): Creates a navmesh and path graph (associated with navmesh) 
         // canvasOrigin: bottom left corner of navigable region in world coordinates
         // canvasWidth: width of navigable region in world dimensions
@@ -139,16 +132,15 @@ namespace GameAICourse
         //      entries in each edge list are indices into pathNodes
         // 
         public static void Create(
-        Vector2 canvasOrigin, float canvasWidth, float canvasHeight,
+            Vector2 canvasOrigin, float canvasWidth, float canvasHeight,
             List<Polygon> obstacles, float agentRadius,
             out List<Polygon> origTriangles,
             out List<Polygon> navmeshPolygons,
             out AdjacentPolygons adjPolys,
             out List<Vector2> pathNodes,
             out List<List<int>> pathEdges
-            )
+        )
         {
-
             // Some basic initialization
             pathEdges = new List<List<int>>();
             pathNodes = new List<Vector2>();
@@ -185,11 +177,11 @@ namespace GameAICourse
 
 
             // ******************** PHASE 0 - Change your name string ************************
-            // TODO set your name above
+            // set your name above
 
             //********************* PHASE I - Brute force triangle formation *****************
 
-            // In this phase, some scaffolding is provided for you. Your goal to to produce
+            // In this phase, some scaffolding is provided for you. Your goal to produce
             // triangles that will serve as the foundation of your navmesh. You will use
             // a brute force method of evaluating all combinations of three vertices to see
             // if a valid triangle is formed. This includes checking for degenerate triangles, 
@@ -197,15 +189,17 @@ namespace GameAICourse
             // triangles you already made. There is also a special test to see if triangles
             // break adjacency (described later).
 
+            // Define the dictionary to store the results
+            Dictionary<(Vector2Int, Vector2Int), bool> obstacleEdgeCache =
+                new Dictionary<(Vector2Int, Vector2Int), bool>();
+
             // Iterate through combinations of obstacle vertices that can form triangle
             // candidates.
             var obstVertCount = obstacleVertices.Count;
             for (int i = 0; i < obstVertCount - 2; ++i)
             {
-
                 for (int j = i + 1; j < obstVertCount - 1; ++j)
                 {
-
                     for (int k = j + 1; k < obstVertCount; ++k)
                     {
                         // These are vertices for a candidate triangle
@@ -218,7 +212,8 @@ namespace GameAICourse
 
                         // TODO first lets check if the candidate triangle
                         // is NOT degenerate. Use IsCollinear(), if
-                        // it is then just call continue to go to the next tri
+                        // it is then just call continue to go to the next triangle.
+                        if (IsCollinear(V1, V2, V3)) continue;
 
                         // TODO The next part is potentially a little tricky to understand,
                         // but easy to implement. Many of the edges of the triangles
@@ -229,9 +224,18 @@ namespace GameAICourse
                         // common edge (not coincident edges with different vertices).
                         // What you need to do is first determine which of the 3 tri edges
                         // are edges of an obstacle polygon via IsLineSegmentInPolygons().                     
-                        //
                         // Be sure to store these IsLineSegmentInPolygons() test results in vars 
-                        // since the test is expensive and you need the info later.
+                        // since the test is expensive, and you need the info later.
+                        
+                        // Build edges of the triangle
+                        var triEdges = new List<(Vector2Int, Vector2Int)>()
+                        {
+                            (V1, V2),
+                            (V2, V3),
+                            (V3, V1)
+                        };
+
+                        
                         // After that, each tri edge that is NOT a line/edge in a poly
                         // should be checked further to see if there are any obstacle vertices
                         // that are ON the line formed by the tri edge and BETWEEN the start and end point.
@@ -245,6 +249,12 @@ namespace GameAICourse
                         // (Note: that if a tri edge is true for IsLineSegmentInPolygons() that it
                         // can still be valid. It's just impossible for the Between() test
                         // to fail. So we skip unnecessary Between() tests for efficiency.)
+                        
+                        var isEdge1InPolygons = edgeInPolygonsCache[(V1, V2)];
+                        var isEdge2InPolygons = edgeInPolygonsCache[(V2, V3)];
+                        var isEdge3InPolygons = edgeInPolygonsCache[(V3, V1)];
+                        
+                        
 
 
                         // TODO If the tri candidate has gotten this far, now create
@@ -276,14 +286,13 @@ namespace GameAICourse
                         // determine whether you should then call
                         // InteriorIntersectionLineSegmentWithPolygons(). If this test intersects,
                         // this skip the tri by calling continue.
-                        
+
 
                         // TODO If the triangle has survived this far, add it to 
                         // origTriangles.
                         // Also, add it to the adjPolys dictionary with AddPolygon() (not
                         // Add()). Internally, AddPolygon() is fairly complicated
                         // as it tracks shared edges between polys
-
                     } // for
                 } // for
             } // for
@@ -379,10 +388,6 @@ namespace GameAICourse
             // better quality triangles (not long and skinny but closer to equilateral).
             // However, you don't need to worry about implementing this.
             // 
-
         } // Create()
-
-
     }
-
 }
