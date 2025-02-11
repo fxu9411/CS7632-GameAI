@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
@@ -110,6 +111,19 @@ namespace GameAICourse
         static public bool IsConvex(Vector2Int[] poly)
         {
             return CG.CheckForConvexity(poly);
+        }
+        
+        
+        static bool IsVertexBetween(Vector2Int start, Vector2Int end, List<Vector2Int> vertices)
+        {
+            foreach (var vertex in vertices)
+            {
+                if (vertex != start && vertex != end && Between(start, end, vertex))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
 
@@ -235,6 +249,14 @@ namespace GameAICourse
                             (V3, V1)
                         };
 
+                        foreach (var edge in triEdges)
+                        {
+                            if (!obstacleEdgeCache.ContainsKey(edge))
+                            {
+                                obstacleEdgeCache[edge] = IsLineSegmentInPolygons(edge.Item1, edge.Item2, obstacles);
+                            }
+                        }
+
                         
                         // After that, each tri edge that is NOT a line/edge in a poly
                         // should be checked further to see if there are any obstacle vertices
@@ -250,23 +272,39 @@ namespace GameAICourse
                         // can still be valid. It's just impossible for the Between() test
                         // to fail. So we skip unnecessary Between() tests for efficiency.)
                         
-                        var isEdge1InPolygons = edgeInPolygonsCache[(V1, V2)];
-                        var isEdge2InPolygons = edgeInPolygonsCache[(V2, V3)];
-                        var isEdge3InPolygons = edgeInPolygonsCache[(V3, V1)];
                         
-                        
-
+                        foreach (var edge in triEdges)
+                        {
+                            if (!obstacleEdgeCache[edge] && IsVertexBetween(edge.Item1, edge.Item2, obstacleVertices))
+                            {
+                                continue;
+                            }
+                        }
 
                         // TODO If the tri candidate has gotten this far, now create
                         // a new Polygon from your tri points. Also, we need to make sure
                         // all tris are consistent ordering. So call IsCCW(). If it's 
                         // NOT then call tri.Reverse() to fix it.
+                        
+                        var triPoly = new Polygon();
+                        Vector2Int[] triPoints = {V1, V2, V3};
+                        
+                        if (!IsCCW(triPoints))
+                        {
+                            triPoints = triPoints.Reverse().ToArray();
+                        }
+                        
+                        triPoly.SetIntegerPoints(triPoints);
+                        
+                        
 
                         // TODO Next, check if your new tri overlaps the other tris you
                         // have added so far. You will be adding valid tris to origTriangles.
                         // So, Use IntersectsConvexPolygons()
                         // If there is an overlap then call continue. Note that IntersectsConvexPolygons
                         // will not return true if the triangles are only touching.
+                        
+                        if (IntersectsConvexPolygons(triPoly, origTriangles)) continue;
 
                         // TODO After that, you want to see if your new tri encloses any
                         // obstacleVertices. Use IsPointInsidePolygon() to accomplish this.
@@ -277,6 +315,12 @@ namespace GameAICourse
                         // correctly compares any vertex ordering of the same winding.
                         // NOTE both of these are very rare tests to be successful.
                         // You can temporarily skip it and come back later if you want.
+                        
+                        if (obstacleVertices.Any(vertex => IsPointInsidePolygon(triPoly.getIntegerPoints(), vertex)))
+                        {
+                            continue;
+                        }
+                        
 
                         // TODO you now want to see if your new tri edges intersect
                         // with any of the obstacle edges. However, we can avoid 
@@ -286,6 +330,11 @@ namespace GameAICourse
                         // determine whether you should then call
                         // InteriorIntersectionLineSegmentWithPolygons(). If this test intersects,
                         // this skip the tri by calling continue.
+                        
+                        if (triEdges.Any(edge => !obstacleEdgeCache[edge] && InteriorIntersectionLineSegmentWithPolygons(edge.Item1, edge.Item2, obstacles)))
+                        {
+                            continue;
+                        }
 
 
                         // TODO If the triangle has survived this far, add it to 
@@ -293,6 +342,9 @@ namespace GameAICourse
                         // Also, add it to the adjPolys dictionary with AddPolygon() (not
                         // Add()). Internally, AddPolygon() is fairly complicated
                         // as it tracks shared edges between polys
+                        
+                        origTriangles.Add(triPoly);
+                        adjPolys.AddPolygon(triPoly);
                     } // for
                 } // for
             } // for
@@ -309,7 +361,7 @@ namespace GameAICourse
             // Also, navmeshPolygons is initially just the tris. Those are visualized 
             // as a blue outline. Note that the blue lineweight is very thin for better 
             // debugging of small polys
-
+            
 
             // ********************* PHASE II - Merge Triangles *****************************
             // 
@@ -378,6 +430,7 @@ namespace GameAICourse
             //  You may benefit from a two-pass approach, iterating over the adjPolys.
 
 
+
             // ***************************** FINAL **********************************************
             // Once you have completed everything, you will probably find that the code
             // is very slow. It can be sped up a good bit by creating hashtables of common calculations.
@@ -390,4 +443,6 @@ namespace GameAICourse
             // 
         } // Create()
     }
+    
+    
 }
