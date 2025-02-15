@@ -1,5 +1,4 @@
-﻿// compile_check
-// Remove the line above if you are subitting to GradeScope for a grade. But leave it if you only want to check
+﻿// Remove the line above if you are subitting to GradeScope for a grade. But leave it if you only want to check
 // that your code compiles and the autograder can access your public methods.
 
 using System.Collections;
@@ -205,8 +204,8 @@ namespace GameAICourse
             // break adjacency (described later).
 
             // Define the dictionary to store the results
-            Dictionary<(Vector2Int, Vector2Int), bool> obstacleEdgeCache =
-                new Dictionary<(Vector2Int, Vector2Int), bool>();
+            // Dictionary<(Vector2Int, Vector2Int), bool> obstacleEdgeCache =
+            // new Dictionary<(Vector2Int, Vector2Int), bool>();
 
             // Iterate through combinations of obstacle vertices that can form triangle
             // candidates.
@@ -247,8 +246,11 @@ namespace GameAICourse
                         {
                             (V1, V2),
                             (V2, V3),
-                            (V3, V1)
+                            (V1, V3)
                         };
+
+                        Dictionary<(Vector2Int, Vector2Int), bool> obstacleEdgeCache =
+                            new Dictionary<(Vector2Int, Vector2Int), bool>();
 
                         foreach (var edge in triEdges)
                         {
@@ -273,13 +275,22 @@ namespace GameAICourse
                         // can still be valid. It's just impossible for the Between() test
                         // to fail. So we skip unnecessary Between() tests for efficiency.)
 
-
+                        bool triEdgeIntersects = false;
                         foreach (var edge in triEdges)
                         {
-                            if (!obstacleEdgeCache[edge] && IsVertexBetween(edge.Item1, edge.Item2, obstacleVertices))
+                            if (!obstacleEdgeCache[edge])
                             {
-                                continue;
+                                if (IsVertexBetween(edge.Item1, edge.Item2, obstacleVertices))
+                                {
+                                    triEdgeIntersects = true;
+                                    break;
+                                }
                             }
+                        }
+
+                        if (triEdgeIntersects)
+                        {
+                            continue;
                         }
 
                         // TODO If the tri candidate has gotten this far, now create
@@ -287,15 +298,13 @@ namespace GameAICourse
                         // all tris are consistent ordering. So call IsCCW(). If it's 
                         // NOT then call tri.Reverse() to fix it.
 
-                        var triPoly = new Polygon();
-                        Vector2Int[] triPoints = { V1, V2, V3 };
+                        Polygon triPoly = new Polygon();
+                        triPoly.SetIntegerPoints(new Vector2Int[] { V1, V2, V3 });
 
-                        if (!IsCCW(triPoints))
+                        if (!IsCCW(triPoly.getIntegerPoints()))
                         {
-                            triPoints = triPoints.Reverse().ToArray();
+                            triPoly.Reverse();
                         }
-
-                        triPoly.SetIntegerPoints(triPoints);
 
 
                         // TODO Next, check if your new tri overlaps the other tris you
@@ -304,7 +313,10 @@ namespace GameAICourse
                         // If there is an overlap then call continue. Note that IntersectsConvexPolygons
                         // will not return true if the triangles are only touching.
 
-                        if (IntersectsConvexPolygons(triPoly, origTriangles)) continue;
+                        if (IntersectsConvexPolygons(triPoly, origTriangles))
+                        {
+                            continue;
+                        }
 
                         // TODO After that, you want to see if your new tri encloses any
                         // obstacleVertices. Use IsPointInsidePolygon() to accomplish this.
@@ -321,6 +333,11 @@ namespace GameAICourse
                             continue;
                         }
 
+                        if (obstacles.Any(obstacle => triPoly.Equals(obstacle)))
+                        {
+                            continue;
+                        }
+
 
                         // TODO you now want to see if your new tri edges intersect
                         // with any of the obstacle edges. However, we can avoid 
@@ -331,9 +348,18 @@ namespace GameAICourse
                         // InteriorIntersectionLineSegmentWithPolygons(). If this test intersects,
                         // this skip the tri by calling continue.
 
-                        if (triEdges.Any(edge =>
-                                !obstacleEdgeCache[edge] &&
-                                InteriorIntersectionLineSegmentWithPolygons(edge.Item1, edge.Item2, obstacles)))
+                        bool triIntersects = false;
+                        foreach (var edge in triEdges)
+                        {
+                            if (!obstacleEdgeCache[edge] &&
+                                InteriorIntersectionLineSegmentWithPolygons(edge.Item1, edge.Item2, obstacles))
+                            {
+                                triIntersects = true;
+                                break;
+                            }
+                        }
+
+                        if (triIntersects)
                         {
                             continue;
                         }
