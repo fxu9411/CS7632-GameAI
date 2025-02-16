@@ -6,17 +6,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-
 using GameAI;
 
 
 namespace GameAIStudent
 {
-
     public class ShotSelection
     {
-
-        public const string StudentName = "George P. Burdell <- Not your name, change it!";
+        public const string StudentName = "Weixuan Xu";
 
 
         public enum SelectThrowReturn
@@ -29,40 +26,41 @@ namespace GameAIStudent
         }
 
         public static SelectThrowReturn SelectThrow(
-                // the minion doing the throwing, can also be used to query generic params true of all minions
-                MinionScript thisMinion,
-                // info about the target
-                PrisonDodgeballManager.OpponentInfo opponent,
-                // What is the navmask that defines where on the navmesh the opponent can traverse
-                int opponentNavmask,
-                // typically this is a value a tiny bit smaller than the radius of minion added with radius of the dodgeball
-                float maxAllowedThrowErrDist,
-                // Time since last frame
-                float deltaT,
-                // Output param: The solved projectileDir for ballistic trajectory that intercepts target                
-                out Vector3 projectileDir,
-                // Output param: The speed the projectile is launched at in projectileDir such that
-                // there is a collision with target. projectileSpeed must be <= maxProjectileSpeed
-                out float projectileSpeed,
-                // Output param: The time at which the projectile and target collide
-                out float interceptT,
-                // Output param: where the shot is expected to hit
-                out Vector3 interceptPos
-            )
+            // the minion doing the throwing, can also be used to query generic params true of all minions
+            MinionScript thisMinion,
+            // info about the target
+            PrisonDodgeballManager.OpponentInfo opponent,
+            // What is the navmask that defines where on the navmesh the opponent can traverse
+            int opponentNavmask,
+            // typically this is a value a tiny bit smaller than the radius of minion added with radius of the dodgeball
+            float maxAllowedThrowErrDist,
+            // Time since last frame
+            float deltaT,
+            // Output param: The solved projectileDir for ballistic trajectory that intercepts target                
+            out Vector3 projectileDir,
+            // Output param: The speed the projectile is launched at in projectileDir such that
+            // there is a collision with target. projectileSpeed must be <= maxProjectileSpeed
+            out float projectileSpeed,
+            // Output param: The time at which the projectile and target collide
+            out float interceptT,
+            // Output param: where the shot is expected to hit
+            out Vector3 interceptPos
+        )
         {
             var Mgr = PrisonDodgeballManager.Instance;
 
 
             var opponentVel = opponent.Vel; // Or perhaps use thisMinion.MaxPathSpeed (max speed a minion can go)
-                                            // times dir if you think minion is nearly there.
-                                            // Using something other than the opponent's current Vel requires extra logic
+            // times dir if you think minion is nearly there.
+            // Using something other than the opponent's current Vel requires extra logic
 
             interceptPos = opponent.Pos;
 
             // see if throw is even possible, before deciding whether to actually do it
-            if (!ThrowMethods.PredictThrow(thisMinion.HeldBallPosition, thisMinion.ThrowSpeed, Physics.gravity, opponent.Pos,
-                opponentVel, opponent.Forward, maxAllowedThrowErrDist,
-                out projectileDir, out projectileSpeed, out interceptT, out float altT))
+            if (!ThrowMethods.PredictThrow(thisMinion.HeldBallPosition, thisMinion.ThrowSpeed, Physics.gravity,
+                    opponent.Pos,
+                    opponentVel, opponent.Forward, maxAllowedThrowErrDist,
+                    out projectileDir, out projectileSpeed, out interceptT, out float altT))
             {
                 return SelectThrowReturn.NoThrowTargettingFailed;
             }
@@ -78,6 +76,15 @@ namespace GameAIStudent
             // * agent appears to be turning significantly from previous direction
 
             // On failure, return NoThrowOpponentCurrentlyAccelerating
+            
+            // Get opponent's acceleration
+            float opponentAcc = opponentVel.magnitude / deltaT;
+            
+            if (opponentAcc > 1f)
+            {
+                Debug.Log("Opponent is currently accelerating %f" + opponentAcc);
+                return SelectThrowReturn.NoThrowOpponentCurrentlyAccelerating;
+            }
 
 
             // TODO Next consider the impact of the environment on future agent movement. 
@@ -88,6 +95,12 @@ namespace GameAIStudent
             // NavMesh.Raycast() call and appropriate logic goes here (also see: opponentNavmask)
 
             // On failure, return NoThrowOpponentWillAccelerate
+            
+            if (NavMesh.Raycast(opponent.Pos, interceptPos, out NavMeshHit hit, opponentNavmask))
+            {
+                Debug.Log("Opponent will run into barrier");
+                return SelectThrowReturn.NoThrowOpponentWillAccelerate;
+            }
 
 
             // TODO next consider the possibility that if the ball is thrown, it will hit something before it gets to the agent.
@@ -108,14 +121,24 @@ namespace GameAIStudent
             int mask = Physics.AllLayers & carverMask & ballMask & minionMask;
 
             // On failure due to Physics.Raycast() hit, return NoThrowOpponentOccluded
+            
+            // Cast two parallel rays to check for obstacles
+            Vector3 rayOrigin = thisMinion.HeldBallPosition;
+            Vector3 rayDirection = projectileDir.normalized;
+            // get ball radius
+            float ballRadius = 0.5f;
+            
+
+            RaycastHit hitInfo;
+            if (Physics.Raycast(rayOrigin + Vector3.right * ballRadius, rayDirection, out hitInfo, projectileSpeed * interceptT, mask) ||
+                Physics.Raycast(rayOrigin - Vector3.right * ballRadius, rayDirection, out hitInfo, projectileSpeed * interceptT, mask))
+            {
+                Debug.Log("Opponent is occluded");
+                return SelectThrowReturn.NoThrowOpponentOccluded;
+            }
 
             // We got this far, so the throw is probably a good idea!
             return SelectThrowReturn.DoThrow;
         }
-
-
-
     }
-
-
 }
