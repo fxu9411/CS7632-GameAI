@@ -78,14 +78,12 @@ namespace GameAIStudent
             // On failure, return NoThrowOpponentCurrentlyAccelerating
             
             // Get opponent's acceleration
-            float opponentAcc = opponentVel.magnitude / deltaT;
-            
-            if (opponentAcc > 1f)
+            float opponentAcc = (opponent.Vel - opponent.PrevVel).magnitude / deltaT;
+            if (opponentAcc > 0.1f)
             {
-                Debug.Log("Opponent is currently accelerating %f" + opponentAcc);
+                Debug.Log("Opponent is currently accelerating");
                 return SelectThrowReturn.NoThrowOpponentCurrentlyAccelerating;
             }
-
 
             // TODO Next consider the impact of the environment on future agent movement. 
             // Use NavMesh.Raycast() to determine if opponent would run into barrier before throw would get there
@@ -126,7 +124,7 @@ namespace GameAIStudent
             Vector3 rayOrigin = thisMinion.HeldBallPosition;
             Vector3 rayDirection = projectileDir.normalized;
             // get ball radius
-            float ballRadius = 0.5f;
+            float ballRadius = 0.25f;
             
 
             RaycastHit hitInfo;
