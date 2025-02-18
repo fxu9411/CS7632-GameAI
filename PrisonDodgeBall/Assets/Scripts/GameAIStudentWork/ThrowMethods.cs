@@ -6,17 +6,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
-
 using GameAI;
 
 
 namespace GameAIStudent
 {
-
     public class ThrowMethods
     {
-
-        public const string StudentName = "George P. Burdell <- Not your name, change it!";
+        public const string StudentName = "Weixuan Xu";
 
 
         // Note: You have to implement the following method with prediction:
@@ -92,11 +89,6 @@ namespace GameAIStudent
             // solution with maxAllowedErrorDist. If your solution does solve exactly, you will
             // probably want to add a debug assertion to check your solution against it.
             return true;
-
         }
-
-
-
     }
-
 }
