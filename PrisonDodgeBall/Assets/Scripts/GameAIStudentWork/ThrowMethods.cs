@@ -2,6 +2,7 @@
 // Remove the line above if you are submitting to GradeScope for a grade. But leave it if you only want to check
 // that your code compiles and the autograder can access your public methods.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -82,6 +83,43 @@ namespace GameAIStudent
             // You don't need to predict the speed of your throw. Only the direction assuming full speed.
             // Note that Law of Cosines with holdback WILL require adjusting this.
             projectileSpeed = maxProjectileSpeed;
+
+            // Implement Static Target Prediction
+            Vector3 delta = targetInitPos - projectilePos;
+            var a = 0.25f * projectileGravity.sqrMagnitude;
+            var b = -1 * (Vector3.Dot(projectileGravity, delta) + projectileSpeed * projectileSpeed);
+            var c = delta.sqrMagnitude;
+
+            var discriminant = b * b - 4 * a * c;
+            if (discriminant < 0)
+            {
+                return false;
+            }
+
+            var t1 = (-b + Mathf.Sqrt(discriminant)) / (2 * a);
+            var t2 = (-b - Mathf.Sqrt(discriminant)) / (2 * a);
+
+            if (t1 < 0 && t2 < 0)
+            {
+                return false;
+            }
+
+            if (t1 < 0)
+            {
+                interceptT = t2;
+            }
+            else if (t2 < 0)
+            {
+                interceptT = t1;
+            }
+            else
+            {
+                interceptT = Mathf.Min(t1, t2);
+            }
+
+
+            projectileDir = (2 * delta - projectileGravity * (interceptT * interceptT)) /
+                            (2 * projectileSpeed * interceptT);
 
             // TODO return true or false based on whether target can actually be hit
             // This implementation just thinks, "I guess so?", and returns true.
