@@ -84,49 +84,79 @@ namespace GameAIStudent
             // Note that Law of Cosines with holdback WILL require adjusting this.
             projectileSpeed = maxProjectileSpeed;
 
-            // Implement Static Target Prediction
-            Vector3 delta = targetInitPos - projectilePos;
-            var a = 0.25f * projectileGravity.sqrMagnitude;
-            var b = -1 * (Vector3.Dot(projectileGravity, delta) + projectileSpeed * projectileSpeed);
-            var c = delta.sqrMagnitude;
+            Vector3 deltaPos = targetInitPos - projectilePos;
 
-            var discriminant = b * b - 4 * a * c;
-            if (discriminant < 0)
+            for (int i = 0; i < 6; i++)
             {
-                return false;
+                if (i != 0)
+                {
+                    deltaPos = targetInitPos + targetConstVel * interceptT - projectilePos;
+                }
+
+                var (t1, t2) = CalculateInterceptTime(projectileSpeed, projectileGravity, deltaPos);
+
+                if (t1 < 0 && t2 < 0)
+                {
+                    projectileDir = Vector3.zero;
+                    return false;
+                }
+
+                if (t1 < 0)
+                {
+                    interceptT = t2;
+                }
+                else if (t2 < 0)
+                {
+                    interceptT = t1;
+                }
+                else
+                {
+                    interceptT = Mathf.Min(t1, t2);
+                }
+
+                if (projectileSpeed > maxProjectileSpeed)
+                {
+                    projectileDir = Vector3.zero;
+                    return false;
+                }
             }
 
-            var t1 = (-b + Mathf.Sqrt(discriminant)) / (2 * a);
-            var t2 = (-b - Mathf.Sqrt(discriminant)) / (2 * a);
+            projectileDir = (2f * deltaPos - projectileGravity * (float)Math.Pow(interceptT, 2)) /
+                            (2f * projectileSpeed * interceptT);
+            projectileDir.Normalize();
 
-            if (t1 < 0 && t2 < 0)
-            {
-                return false;
-            }
-
-            if (t1 < 0)
-            {
-                interceptT = t2;
-            }
-            else if (t2 < 0)
-            {
-                interceptT = t1;
-            }
-            else
-            {
-                interceptT = Mathf.Min(t1, t2);
-            }
-
-
-            projectileDir = (2 * delta - projectileGravity * (interceptT * interceptT)) /
-                            (2 * projectileSpeed * interceptT);
-
-            // TODO return true or false based on whether target can actually be hit
-            // This implementation just thinks, "I guess so?", and returns true.
-            // Implementations that don't exactly solve intercepts will need to test the approximate
-            // solution with maxAllowedErrorDist. If your solution does solve exactly, you will
-            // probably want to add a debug assertion to check your solution against it.
             return true;
+        }
+
+        private static (float, float) CalculateInterceptTime(
+            float projectileSpeed,
+            Vector3 projectileGravity,
+            Vector3 deltaPos
+        )
+        {
+            float parameter = Vector3.Dot(projectileGravity, deltaPos) + (float)Math.Pow(projectileSpeed, 2);
+            float outside = parameter;
+            float inside = (float)Math.Pow(parameter, 2) - projectileGravity.sqrMagnitude * deltaPos.sqrMagnitude;
+            float denominator = 0.5f * projectileGravity.sqrMagnitude;
+
+            if (inside < 0)
+            {
+                // Debug.Log("Inside is less than 0");
+                return (-1, -1);
+            }
+
+            if (denominator == 0)
+            {
+                // Debug.Log("Denominator is 0");
+                return (-1, -1);
+            }
+
+            float t1 = (outside + (float)Math.Sqrt(inside)) / denominator;
+            t1 = t1 > 0 ? (float)Math.Sqrt(t1) : -1f;
+            float t2 = (outside - (float)Math.Sqrt(inside)) / denominator;
+            t2 = t2 > 0 ? (float)Math.Sqrt(t2) : -1f;
+
+            return (t1, t2);
         }
     }
 }
