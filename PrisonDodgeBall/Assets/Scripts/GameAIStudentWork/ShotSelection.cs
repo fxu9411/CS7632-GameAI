@@ -55,14 +55,11 @@ namespace GameAIStudent
             // Using something other than the opponent's current Vel requires extra logic
 
             interceptPos = opponent.Pos;
-            
+
             // get ball radius
-            float ballRadius = 0.25f;
-            if (Mgr.GetDodgeballInfo(PrisonDodgeballManager.Team.TeamA, thisMinion.DodgeballIndex, out var ballInfo, false))
-            {
-                ballRadius = ballInfo.Radius;
-            }
-            maxAllowedThrowErrDist = (ballRadius + thisMinion.Radius) * 0.9f;
+            Mgr.GetDodgeballInfo(thisMinion.Team, 0, out var di, false);
+            var ballRadius = di.Radius;
+            maxAllowedThrowErrDist = ballRadius * 0.9f;
 
             // see if throw is even possible, before deciding whether to actually do it
             if (!ThrowMethods.PredictThrow(thisMinion.HeldBallPosition, thisMinion.ThrowSpeed, Physics.gravity,
@@ -85,13 +82,19 @@ namespace GameAIStudent
             // * agent appears to be turning significantly from previous direction
 
             // On failure, return NoThrowOpponentCurrentlyAccelerating
-            
+
             // Get opponent's acceleration
-            float opponentAcc = (opponent.Vel - opponent.PrevVel).magnitude / deltaT;
-            float directionChange = Vector3.Angle(opponent.Vel, opponent.PrevVel);
-            if (opponentAcc > 0.9f || directionChange > 1f)
+            Vector3 opponentAcceleration = (opponent.Vel - opponent.PrevVel) / deltaT;
+
+            // Check if opponent is currently accelerating
+            if (opponentAcceleration.magnitude > 0.5f) // Threshold value can be adjusted
             {
-                // Debug.Log("Opponent is currently accelerating or turning significantly");
+                return SelectThrowReturn.NoThrowOpponentCurrentlyAccelerating;
+            }
+
+            // Check if opponent appears to be turning significantly
+            if (Vector3.Angle(opponent.Vel, opponent.PrevVel) > 10f) // Threshold value can be adjusted
+            {
                 return SelectThrowReturn.NoThrowOpponentCurrentlyAccelerating;
             }
 
@@ -103,7 +106,7 @@ namespace GameAIStudent
             // NavMesh.Raycast() call and appropriate logic goes here (also see: opponentNavmask)
 
             // On failure, return NoThrowOpponentWillAccelerate
-            
+
             if (NavMesh.Raycast(opponent.Pos, interceptPos, out NavMeshHit hit, opponentNavmask))
             {
                 // Debug.Log("Opponent will run into barrier");
@@ -129,15 +132,17 @@ namespace GameAIStudent
             int mask = Physics.AllLayers & carverMask & ballMask & minionMask;
 
             // On failure due to Physics.Raycast() hit, return NoThrowOpponentOccluded
-            
+
             // Cast two parallel rays to check for obstacles
             Vector3 rayOrigin = thisMinion.HeldBallPosition;
             Vector3 rayDirection = projectileDir.normalized;
 
 
             RaycastHit hitInfo;
-            if (Physics.Raycast(rayOrigin + Vector3.right * ballRadius, rayDirection, out hitInfo, projectileSpeed * interceptT, mask) ||
-                Physics.Raycast(rayOrigin - Vector3.right * ballRadius, rayDirection, out hitInfo, projectileSpeed * interceptT, mask))
+            if (Physics.Raycast(rayOrigin + Vector3.right * ballRadius, rayDirection, out hitInfo,
+                    projectileSpeed * interceptT, mask) ||
+                Physics.Raycast(rayOrigin - Vector3.right * ballRadius, rayDirection, out hitInfo,
+                    projectileSpeed * interceptT, mask))
             {
                 // Debug.Log("Opponent is occluded");
                 return SelectThrowReturn.NoThrowOpponentOccluded;

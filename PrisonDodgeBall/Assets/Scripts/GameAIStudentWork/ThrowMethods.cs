@@ -86,11 +86,18 @@ namespace GameAIStudent
 
             Vector3 deltaPos = targetInitPos - projectilePos;
 
+            Vector3 prevDeltaPos = new Vector3(0, 0, 0);
+
             for (int i = 0; i < 6; i++)
             {
                 if (i != 0)
                 {
+                    prevDeltaPos = deltaPos;
                     deltaPos = targetInitPos + targetConstVel * interceptT - projectilePos;
+                    if (deltaPos == prevDeltaPos)
+                    {
+                        break;
+                    }
                 }
 
                 var (t1, t2) = CalculateInterceptTime(projectileSpeed, projectileGravity, deltaPos);
@@ -123,6 +130,15 @@ namespace GameAIStudent
 
             projectileDir = (2f * deltaPos - projectileGravity * (float)Math.Pow(interceptT, 2)) /
                             (2f * projectileSpeed * interceptT);
+
+            // Check if it's more than maxAllowedErrorDist
+            // if (Vector3.Distance(projectilePos + projectileDir * projectileSpeed * interceptT,
+            //         targetInitPos + targetConstVel * interceptT) > maxAllowedErrorDist)
+            // {
+            //     projectileDir = Vector3.zero;
+            //     return false;
+            // }
+
             projectileDir.Normalize();
 
             return true;
