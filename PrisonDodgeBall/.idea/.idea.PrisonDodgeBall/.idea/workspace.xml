@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7fc23ceb-47ec-4810-9e1c-a00d3f5dc266" name="Changes" comment="" />
+    <list default="true" id="7fc23ceb-47ec-4810-9e1c-a00d3f5dc266" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.PrisonDodgeBall/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.PrisonDodgeBall/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/GameAIStudentWork/MinionStateMachine.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/GameAIStudentWork/MinionStateMachine.cs" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -14,12 +17,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock://D:/GitHub/CS7632-GameAI/PrisonDodgeBall/Assets/Scripts/GameAIStudentWork/ShotSelection.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://D:/GitHub/CS7632-GameAI/PrisonDodgeBall/Assets/Scripts/GameAIStudentWork/ThrowMethods.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://D:/GitHub/CS7632-GameAI/PrisonDodgeBall/Assets/Scripts/GameAIStudentWork/ThrowMethods.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://D:/GitHub/CS7632-GameAI/PrisonDodgeBall/Assets/Scripts/GameAIStudentWork/ThrowMethods.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://D:/GitHub/CS7632-GameAI/PrisonDodgeBall/Assets/Scripts/GameAIStudentWork/ThrowMethods.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock://D:/GitHub/CS7632-GameAI/PrisonDodgeBall/Assets/Scripts/GameAIStudentWork/ThrowMethods.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///Users/nthere/Github/CS7632-GameAI/PrisonDodgeBall/Assets/Scripts/GameAIStudentWork/MinionStateMachine.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProjectColorInfo">{
@@ -31,23 +29,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
     <configuration name="Start Unity" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="D:\2021.3.45f1\Editor\Unity.exe" />
+      <option name="EXE_PATH" value="/Applications/Unity/Hub/Editor/2021.3.45f1/Unity.app/Contents/MacOS/Unity" />
       <option name="PROGRAM_PARAMETERS" value="-projectPath D:\GitHub\CS7632-GameAI\PrisonDodgeBall -debugCodeOptimization" />
       <option name="WORKING_DIRECTORY" value="D:\GitHub\CS7632-GameAI\PrisonDodgeBall" />
       <option name="PASS_PARENT_ENVS" value="1" />
@@ -55,7 +54,7 @@
       <method v="2" />
     </configuration>
     <configuration name="Unit Tests (batch mode)" type="RunUnityExe" factoryName="Unity Executable">
-      <option name="EXE_PATH" value="D:\2021.3.45f1\Editor\Unity.exe" />
+      <option name="EXE_PATH" value="/Applications/Unity/Hub/Editor/2021.3.45f1/Unity.app/Contents/MacOS/Unity" />
       <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath D:\GitHub\CS7632-GameAI\PrisonDodgeBall -testResults Logs/results.xml -logFile Logs/Editor.log -testPlatform EditMode -debugCodeOptimization" />
       <option name="WORKING_DIRECTORY" value="D:\GitHub\CS7632-GameAI\PrisonDodgeBall" />
       <option name="PASS_PARENT_ENVS" value="1" />
@@ -101,6 +100,7 @@
       <workItem from="1739734107110" duration="349000" />
       <workItem from="1739823873837" duration="5313000" />
       <workItem from="1739849795847" duration="4186000" />
+      <workItem from="1740354236192" duration="876000" />
     </task>
     <task id="LOCAL-00001" summary="Update ShotSelection to reflect new student name and enhance throw prediction logic">
       <option name="closed" value="true" />

@@ -17,7 +17,7 @@ namespace GameAIStudent
     [RequireComponent(typeof(MinionScript))]
     public class MinionStateMachine : MonoBehaviour
     {
-        public const string StudentName = "George P. Burdell 🠔 Not your name. Change it!";
+        public const string StudentName = "Weixuan Xu";
 
         public const string GlobalTransitionStateName = "GlobalTransition";
         public const string CollectBallStateName = "CollectBall";
